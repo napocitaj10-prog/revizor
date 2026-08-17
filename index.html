@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>Revízor.fun – Žilina MHD</title>
+<style>
+:root{
+  --bg:#f3f5f8;--card:#fff;--text:#111827;--muted:#64748b;--primary:#0f172a;
+  --accent:#2563eb;--accent2:#e0e7ff;--danger:#dc2626;--line:#e5e7eb;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+button,select,input{font:inherit}
+.app{max-width:560px;margin:auto;min-height:100vh;padding-bottom:90px}
+.top{background:var(--primary);color:white;padding:22px 18px 28px;border-radius:0 0 24px 24px}
+.top small{opacity:.7}.top h1{margin:6px 0 0;font-size:27px}
+.content{padding:16px}
+.hero{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;margin-top:-4px;box-shadow:0 8px 30px rgba(15,23,42,.06)}
+.hero h2{margin:0 0 7px;font-size:21px}.hero p{margin:0;color:var(--muted);line-height:1.45}
+.big-btn{width:100%;border:0;border-radius:17px;padding:17px;margin-top:16px;background:var(--accent);color:white;font-weight:800;font-size:17px}
+.section{margin-top:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px}
+.hidden{display:none}
+.step{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.step .n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--accent2);color:#3730a3;font-weight:800}
+.step strong{font-size:16px}
+label{display:block;margin:14px 0 7px;font-weight:700;font-size:14px}
+select{width:100%;padding:14px;border:1px solid #d7dce3;border-radius:13px;background:#fff;color:var(--text)}
+.route-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.route-btn{border:1px solid var(--line);background:#fff;border-radius:14px;padding:13px 7px;font-weight:800;min-height:54px}
+.route-btn.active{background:var(--primary);color:white;border-color:var(--primary)}
+.meta{color:var(--muted);font-size:13px;line-height:1.4;margin-top:8px}
+.back{border:0;background:transparent;padding:8px 0;margin-bottom:8px;color:var(--muted);font-weight:800}
+.primary,.ghost{border:0;border-radius:13px;padding:14px 16px;font-weight:800}
+.primary{background:var(--accent);color:white;width:100%;margin-top:14px}
+.ghost{background:#eef2f7;color:var(--primary);width:100%;margin-top:9px}
+.notice{margin-top:12px;padding:12px;border-radius:13px;background:#f8fafc;border:1px solid var(--line);font-size:13px;color:#475569;line-height:1.45}
+.success{margin-top:12px;padding:14px;border-radius:13px;background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;font-weight:700}
+.code-display{display:flex;justify-content:center;gap:12px;margin:14px 0 16px}
+.code-display span{width:48px;height:54px;border:1px solid #d7dce3;border-radius:13px;background:#fff;display:grid;place-items:center;font-size:28px;font-weight:800}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.keypad button{border:1px solid var(--line);background:#fff;border-radius:14px;min-height:58px;font-size:21px;font-weight:800}
+.keypad button:active,.choice-btn:active{transform:scale(.98)}
+.key-empty{visibility:hidden}
+.code-choices{margin-top:16px}
+.choice-title{font-weight:800;margin-bottom:9px}
+.choice-btn{width:100%;border:1px solid var(--line);background:#fff;border-radius:14px;padding:15px;margin-top:8px;text-align:left;font-weight:800;font-size:16px}
+
+.list{display:grid;gap:10px}
+.line-item{background:#f8fafc;border-radius:15px;padding:13px;border:1px solid var(--line)}
+.line-top{display:flex;align-items:center;gap:10px}.badge{min-width:42px;height:38px;border-radius:11px;background:var(--primary);color:#fff;display:grid;place-items:center;font-weight:800}
+.line-item strong{font-size:15px}.line-item small{color:var(--muted);display:block;margin-top:3px}
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(560px,100%);background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr auto;gap:8px;padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
+.bottom button{border:0;background:transparent;padding:9px;border-radius:12px;font-weight:800;color:var(--muted)}
+.bottom button.active{background:#eef2ff;color:#3730a3}
+.admin-nav{width:48px;justify-self:end}
+#adminDashboard .line-item{background:#f8fafc}
+@media(max-width:380px){.route-grid{grid-template-columns:repeat(3,1fr)}}
+
+/* ===== V2 FIXED MOBILE APP VISUALS ===== */
+:root{
+  --app-shadow:0 14px 34px rgba(15,23,42,.08);
+  --app-shadow-strong:0 18px 42px rgba(15,23,42,.11);
+}
+html{background:var(--bg);scroll-behavior:smooth}
+body{
+  min-height:100vh;
+  overflow-x:hidden;
+  -webkit-tap-highlight-color:transparent;
+  position:relative;
+}
+body::before,
+body::after{
+  content:"";
+  position:fixed;
+  z-index:-1;
+  pointer-events:none;
+  border-radius:999px;
+  filter:blur(60px);
+  opacity:.26;
+  will-change:transform;
+}
+body::before{
+  width:260px;height:260px;left:-120px;top:16%;
+  background:rgba(37,99,235,.14);
+  animation:bgFloat1 16s ease-in-out infinite alternate;
+}
+body::after{
+  width:230px;height:230px;right:-110px;top:56%;
+  background:rgba(79,70,229,.11);
+  animation:bgFloat2 19s ease-in-out infinite alternate;
+}
+.top{
+  position:relative;
+  overflow:hidden;
+  padding-top:calc(22px + env(safe-area-inset-top));
+  box-shadow:0 10px 28px rgba(15,23,42,.13);
+}
+.top::before{
+  content:"";
+  position:absolute;
+  width:160px;height:160px;right:-75px;top:-80px;
+  border-radius:50%;
+  background:rgba(255,255,255,.065);
+  animation:topOrb 9s ease-in-out infinite;
+}
+.hero,.card{
+  box-shadow:var(--app-shadow);
+  transition:transform .22s ease,box-shadow .22s ease;
+}
+.hero:hover,.card:hover{
+  transform:translateY(-2px);
+  box-shadow:var(--app-shadow-strong);
+}
+.big-btn,.primary,.ghost,.route-btn,.choice-btn,.keypad button,.bottom button{
+  transition:transform .14s ease,box-shadow .18s ease,background-color .18s ease;
+}
+.big-btn{box-shadow:0 10px 24px rgba(37,99,235,.2)}
+.big-btn:active,.primary:active,.ghost:active,.route-btn:active,.choice-btn:active,.keypad button:active{
+  transform:scale(.975);
+}
+.route-btn.active{box-shadow:0 7px 18px rgba(15,23,42,.14)}
+.line-item{transition:transform .18s ease,box-shadow .18s ease}
+.line-item:active{transform:scale(.988)}
+.bottom{box-shadow:0 -8px 24px rgba(15,23,42,.075)}
+.progress{margin:2px 0 20px}
+.progress-track{
+  width:100%;height:8px;background:#e9edf3;border-radius:999px;overflow:hidden
+}
+.progress-fill{
+  width:25%;height:100%;border-radius:inherit;
+  background:linear-gradient(90deg,#2563eb,#4f46e5);
+  box-shadow:0 2px 10px rgba(37,99,235,.2);
+  transition:width .42s cubic-bezier(.22,1,.36,1);
+}
+.progress-label{
+  display:flex;justify-content:space-between;gap:12px;
+  margin-top:8px;color:var(--muted);font-size:12px;font-weight:800;
+}
+.report-step{animation:stepEnter .30s ease both}
+.success{animation:successEnter .32s ease both}
+@keyframes bgFloat1{
+  0%{transform:translate3d(0,0,0) scale(1)}
+  100%{transform:translate3d(28px,-18px,0) scale(1.06)}
+}
+@keyframes bgFloat2{
+  0%{transform:translate3d(0,0,0) scale(1)}
+  100%{transform:translate3d(-24px,24px,0) scale(1.08)}
+}
+@keyframes topOrb{
+  0%,100%{transform:scale(.94);opacity:.55}
+  50%{transform:scale(1.08);opacity:1}
+}
+@keyframes stepEnter{
+  from{opacity:0;transform:translateY(7px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes successEnter{
+  from{opacity:0;transform:translateY(6px) scale(.985)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@media(max-width:560px){
+  .content{padding:14px}
+  .top{border-radius:0 0 28px 28px}
+  .hero,.card{border-radius:22px}
+  .big-btn{min-height:56px}
+  .route-btn{min-height:58px}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+  <small>Nahlásenie udalosti v MHD</small>
+  <h1>🚍 Žilina MHD</h1>
+</header>
+
+<main class="content">
+  <section id="home" class="section">
+    <div class="hero">
+      <h2>MHD Žilina</h2>
+      <p>Vyber linku, smer a zastávku a odošli hlásenie za pár sekúnd.</p>
+      <button class="big-btn" onclick="showReport()">📍 Nahlásiť udalosť</button>
+    </div>
+<div class="card section">
+      <h3>Aktuálne linky</h3>
+      <div id="quickLines" class="list"></div>
+      <div class="meta">Údaje liniek sú založené na aktuálnych prehľadoch DPMŽ a verejne dostupných cestovných poriadkoch.</div>
+    </div>
+  </section>
+
+  <section id="report" class="section hidden">
+    <div class="card">
+      <div class="progress" aria-label="Postup hlásenia">
+        <div class="progress-track">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <div class="progress-label">
+          <span id="progressText">Krok 1 zo 4</span>
+          <span>Hlásenie</span>
+        </div>
+      </div>
+
+      <div id="reportStep1" class="report-step">
+        <div class="step"><div class="n">1</div><strong>Vyber číslo linky</strong></div>
+        <div id="routeButtons" class="route-grid"></div>
+      </div>
+
+      <div id="reportStep2" class="report-step hidden">
+        <button class="back" onclick="goReportStep(1)">← Späť</button>
+        <div class="step"><div class="n">2</div><strong>Vyber smer</strong></div>
+        <select id="direction" onchange="loadStops()"></select>
+        <button class="primary" onclick="goReportStep(3)">Pokračovať</button>
+      </div>
+
+      <div id="reportStep3" class="report-step hidden">
+        <button class="back" onclick="goReportStep(2)">← Späť</button>
+        <div class="step"><div class="n">3</div><strong>Vyber aktuálnu zastávku</strong></div>
+        <select id="stop"></select>
+        <button class="primary" onclick="goReportStep(4)">Pokračovať</button>
+      </div>
+
+      <div id="reportStep4" class="report-step hidden">
+        <button class="back" type="button" onclick="goReportStep(3)">← Späť</button>
+        <div class="step"><div class="n">4</div><strong>Zadaj 4-miestny kód</strong></div>
+        <p class="meta">Po zadaní štyroch číslic sa automaticky zobrazí dostupná možnosť.</p>
+
+        <input id="code" type="hidden" value="">
+        <div id="codeDisplay" class="code-display" aria-label="Zadaný kód">
+          <span>•</span><span>•</span><span>•</span><span>•</span>
+        </div>
+
+        <div class="keypad" aria-label="Číselná klávesnica">
+          <button type="button" onclick="pressKey('1')">1</button>
+          <button type="button" onclick="pressKey('2')">2</button>
+          <button type="button" onclick="pressKey('3')">3</button>
+          <button type="button" onclick="pressKey('4')">4</button>
+          <button type="button" onclick="pressKey('5')">5</button>
+          <button type="button" onclick="pressKey('6')">6</button>
+          <button type="button" onclick="pressKey('7')">7</button>
+          <button type="button" onclick="pressKey('8')">8</button>
+          <button type="button" onclick="pressKey('9')">9</button>
+          <button class="key-empty" aria-hidden="true" tabindex="-1"></button>
+          <button type="button" onclick="pressKey('0')">0</button>
+          <button type="button" onclick="deleteKey()" aria-label="Vymazať posledné číslo">⌫</button>
+        </div>
+
+        <div id="codeChoices" class="code-choices hidden">
+          <div id="codeChoiceTitle" class="choice-title"></div>
+          <button id="wifiChoice" class="choice-btn hidden" type="button"
+                  onclick="chooseReportType('Slabá Wi-Fi')">Slabá Wi-Fi</button>
+          <button id="inspectorChoice" class="choice-btn hidden" type="button"
+                  onclick="chooseReportType('Revízor')">Revízor</button>
+        </div>
+
+        <button class="ghost" type="button" onclick="resetReport()">Skúsiť znova</button>
+        <div id="success" class="success hidden"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="lines" class="section hidden">
+    <div class="card">
+      <h3>🚌 Všetky linky</h3>
+      <div id="allLines" class="list"></div>
+    </div>
+  </section>
+
+  <section id="admin" class="section hidden">
+    <div class="card">
+      <h3>🔐 Admin</h3>
+
+      <div id="adminLoginBox">
+        <p class="meta">Prihlásenie je chránené serverom. Heslo nie je uložené v HTML.</p>
+
+        <label for="adminUser">Používateľ</label>
+        <input id="adminUser" autocomplete="username"
+               style="width:100%;padding:14px;border:1px solid #d7dce3;border-radius:13px">
+
+        <label for="adminPass">Heslo</label>
+        <input id="adminPass" type="password" autocomplete="current-password"
+               style="width:100%;padding:14px;border:1px solid #d7dce3;border-radius:13px">
+
+        <button class="primary" type="button" onclick="adminLogin()">Prihlásiť</button>
+        <div id="adminStatus" class="notice hidden"></div>
+      </div>
+
+      <div id="adminDashboard" class="hidden">
+        <div class="line-top" style="justify-content:space-between;margin-bottom:12px">
+          <h3 style="margin:0">Hlásenia</h3>
+          <button class="ghost" type="button" onclick="loadAdminReports()" style="width:auto;margin-top:0">Obnoviť</button>
+        </div>
+        <div id="adminReports" class="list"></div>
+        <button class="ghost" type="button" onclick="adminLogout()">Odhlásiť</button>
+      </div>
+
+      <button class="ghost" type="button" onclick="showHome()">Späť</button>
+    </div>
+  </section>
+</main>
+
+<nav class="bottom">
+  <button id="navHome" class="active" onclick="showHome()">⌂ Domov</button>
+  <button id="navLines" onclick="showLines()">🚌 Linky</button>
+  <button id="navAdmin" class="admin-nav" onclick="showAdmin()" aria-label="Admin">🔐</button>
+</nav>
+</div>
+
+<script>
+const L = {
+"1": {
+ type:"trolejbus", dirs:{
+  "Matice slovenskej":["Kvačalova, DPMŽ","Priemyselná","Závodská","Hálkova","Polícia","Veľká okružná, Aupark","Predmestská","Košická, TESCO hypermarket","Sv. Cyrila a Metoda","Obchodná","Matice slovenskej"],
+  "Kvačalova, DPMŽ":["Matice slovenskej","Obchodná","Sv. Cyrila a Metoda","Košická, TESCO hypermarket","Predmestská","Veľká okružná, Aupark","Polícia","Hálkova","Závodská","Kvačalova, DPMŽ"]
+ }},
+"3": {
+ type:"trolejbus", dirs:{
+  "Jaseňová":["Jaseňová","Limbová","Smreková","Centrálna","Rudnayova","Tulipánová","Park Ľudovíta Štúra","Fakultná nemocnica","Štefánikovo námestie","Železničná stanica","Hurbanova","Polícia","Veľká okružná, Aupark","Fakultná nemocnica","Park Ľudovíta Štúra","Tulipánová","Rudnayova","Centrálna","Smreková","Limbová","Jaseňová"]
+ }},
+"4": {
+ type:"trolejbus", dirs:{
+  "Matice slovenskej":["Fatranská","Matice slovenskej","Obchodná","Sv. Cyrila a Metoda","Košická, TESCO hypermarket","Predmestská","Štefánikovo námestie","Železničná stanica","Hurbanova","Polícia","Komenského","Mostná","Hlinská","Poľná","Smreková","Limbová","Jaseňová","Pod hájom","Žilinská univerzita","Fatranská","Matice slovenskej"]
+ }},
+"5": {
+ type:"trolejbus", dirs:{
+  "Jaseňová":["Fatranská","Matice slovenskej","Obchodná","Sv. Cyrila a Metoda","Poštová","Plaváreň","Fakultná nemocnica","Veľká okružná, Aupark","Komenského","Mostná","Hlinská","Poľná","Smreková","Limbová","Jaseňová"],
+  "Fatranská":["Jaseňová","Limbová","Smreková","Poľná","Hlinská","Mostná","Veľká okružná, Aupark","Fakultná nemocnica","Plaváreň","Poštová","Sv. Cyrila a Metoda","Obchodná","Matice slovenskej","Fatranská"]
+ }},
+"6": {
+ type:"trolejbus", dirs:{
+  "Matice slovenskej":["Stodolova","Slnečné námestie","Mateja Bela","Hôrecká","Žitná","Závodského","Závodská","Hálkova","Polícia","Hurbanova","Železničná stanica","Štefánikovo námestie","Fakultná nemocnica","Plaváreň","Dubeň, obch. centrum"],
+  "Stodolova":["Matice slovenskej","Obchodná","Sv. Cyrila a Metoda","Poštová","Dubeň, obch. centrum","Plaváreň","Fakultná nemocnica","Štefánikovo námestie","Železničná stanica","Hurbanova","Polícia","Hálkova","Závodská","Závodského","Žitná","Hôrecká","Essenská","Mateja Bela","Slnečné námestie","Stodolova"]
+ }},
+"7": {
+ type:"trolejbus", dirs:{
+  "Sv. Cyrila a Metoda":["Stodolova","Slnečné námestie","Mateja Bela","Hôrecká","Žitná","Závodského","Závodská","Hálkova","Polícia","Komenského","Mostná","Hlinská","Poľná","Smreková","Limbová","Jaseňová","Pod hájom","Žilinská univerzita","Fatranská","Obchodná","Sv. Cyrila a Metoda"],
+  "Stodolova":["Sv. Cyrila a Metoda","Obchodná","Fatranská","Žilinská univerzita","Pod hájom","Jaseňová","Limbová","Smreková","Poľná","Hlinská","Mostná","Polícia","Hálkova","Závodská","Závodského","Žitná","Hôrecká","Essenská","Mateja Bela","Slnečné námestie","Stodolova"]
+ }},
+"14": {
+ type:"trolejbus", dirs:{
+  "Fatranská":["Matice slovenskej","Fatranská","Žilinská univerzita","Pod hájom","Jaseňová","Limbová","Smreková","Poľná","Hlinská","Mostná","Polícia","Hurbanova","Železničná stanica","Štefánikovo námestie","Predmestská","Košická, TESCO hypermarket","Sv. Cyrila a Metoda","Obchodná","Matice slovenskej","Fatranská"]
+ }},
+"16": {
+ type:"trolejbus", dirs:{
+  "Stodolova":["Stodolova","Slnečné námestie","Mateja Bela","Hôrecká","Žitná","Závodského","Závodská","Hálkova","Polícia","Veľká okružná, Aupark","Štefánikovo námestie","Železničná stanica","Hurbanova","Polícia","Hálkova","Závodská","Závodského","Žitná","Hôrecká","Essenská","Mateja Bela","Slnečné námestie","Stodolova"]
+ }},
+"20": {
+ type:"autobus", dirs:{
+  "Bytčica":["Bytčica","Kultúrny dom","Na stanicu","Pažite","Stanica Solinky","Elektrovod","Poľná","Hlinská","Mostná","Fakultná nemocnica","Plaváreň","Poštová","Sv. Cyrila a Metoda","Obchodná","Matice slovenskej","Zvolenská","Rosinská, plemenársky podnik","Rosinská, Výskumný ústav výpočtovej techniky","Fatranská","Matice slovenskej","Obchodná","Sv. Cyrila a Metoda","Poštová","Plaváreň","Antona Bernoláka","Stavomontáže","Elektrovod","Stanica Solinky","Pažite","Na stanicu","Kultúrny dom","Bytčica"]
+ }},
+"21": {
+ type:"autobus", dirs:{
+  "Považský Chlmec":["Bánová","K cintorínu","Námestie sv. Jána Bosca","Oslobodenia","Jedľová","Žitná","Závodského","Závodská","Hálkova","Veľká okružná","Hurbanova","Kysucká","Budatínsky hrad","Pri Kysuci","Chlmecké námestie","Bytčianska","Považský Chlmec"],
+  "Bánová":["Považský Chlmec","Bytčianska","Chlmecké námestie","Pri Kysuci","Budatínsky hrad","Kysucká","Hurbanova","Veľká okružná","Hálkova","Závodská","Závodského","Žitná","Jedľová","Oslobodenia","Námestie sv. Jána Bosca","K cintorínu","Bánová"]
+ }},
+"22": {
+ type:"autobus", dirs:{
+  "Bytčica":["Brodno","Broďňanská","Zábrežná","Budatínsky hrad","Kysucká","Železničná stanica","Štefánikovo námestie","Veľká okružná, Aupark","Hálkova","Saleziánska","Stavomontáže","Elektrovod","Stanica Solinky","Pažite","Na stanicu","Kultúrny dom","Bytčica"],
+  "Brodno":["Bytčica","Kultúrny dom","Na stanicu","Pažite","Stanica Solinky","Elektrovod","Stavomontáže","Saleziánska","Hálkova","Veľká okružná, Aupark","Štefánikovo námestie","Železničná stanica","Kysucká","Budatínsky hrad","Zábrežná","Broďňanská","Brodno"]
+ }},
+"23": {
+ type:"autobus", dirs:{
+  "Dolná":["Železničná stanica","Kysucká","Pri Váhu","Dolná"],
+  "Železničná stanica":["Dolná","Pri Váhu","Budatínsky hrad","Kysucká","Železničná stanica"]
+ }},
+"24": {
+ type:"autobus", dirs:{
+  "Magočovská":["Priehradná","Furdekova","Oceliarska","Bratislavská","Hollého","Hurbanova","Železničná stanica","Štefánikovo námestie","Predmestská","Košická, TESCO hypermarket","Pri celulózke","Rosinky","Bagarova","Rakové","Dolná Trnovská","Potoky","Cintorínska","Ovocinárska","Horná Trnovská","Magočovská"],
+  "Priehradná":["Magočovská","Horná Trnovská","Ovocinárska","Cintorínska","Potoky","Dolná Trnovská","Rakové","Bagarova","Rosinky","Pri celulózke","Košická, TESCO hypermarket","Predmestská","Štefánikovo námestie","Železničná stanica","Hurbanova","Hollého","Bratislavská","Oceliarska","Furdekova","Priehradná"]
+ }},
+"26": {
+ type:"autobus", dirs:{
+  "Kamenná, PRIUS":["Rosinská, Výskumný ústav výpočtovej techniky","Rosinská, plemenársky podnik","Zvolenská","Pri celulózke","Košická, TESCO hypermarket","Predmestská","Štefánikovo námestie","Železničná stanica","Hurbanova","Veľká okružná","Hálkova","Závodská","Bánovská cesta","Kamenná, obchodné centrum","Kamenná, domáce potreby","Kamenná, kovošrot","Kamenná, PRIUS"],
+  "Rosinská, Výskumný ústav výpočtovej techniky":["Kamenná, PRIUS","Kamenná, kovošrot","Kamenná, domáce potreby","Kamenná, obchodné centrum","Bánovská cesta","Závodská","Hálkova","Veľká okružná","Hurbanova","Železničná stanica","Štefánikovo námestie","Predmestská","Košická, TESCO hypermarket","Pri celulózke","Zvolenská","Rosinská, plemenársky podnik","Rosinská, Výskumný ústav výpočtovej techniky"]
+ }},
+"27": {
+ type:"autobus", dirs:{
+  "Zástranie":["Stodolova","Pod vinicou","Kvačalova, DPMŽ","Cestárska","Kragujevská","Hálkova","Polícia","Hurbanova","Kysucká","Budatínsky hrad","Na lány","Letná","Farebná","Budatínska","Údolná","Prípojná","Salaš","Na chotári","Na Straník","Zástranie"],
+  "Stodolova":["Zástranie","Na Straník","Na chotári","Salaš","Prípojná","Údolná","Budatínska","Farebná","Letná","Na lány","Budatínsky hrad","Kysucká","Hurbanova","Rázusova","Kragujevská","Cestárska","Kvačalova, DPMŽ","Pod vinicou","Stodolova"]
+ }},
+"29": {
+ type:"autobus", dirs:{
+  "Železničná stanica Cestárska":["Žilinská Lehota","Kortinská","Pod záhradkou","Rázcestie Hričov","Vodná nádrž Hričov","Pod Kozínom","Prieložná","Hričovská","Cestárska","Priemyselná","Závodská","Hálkova","Veľká okružná","Hurbanova","Železničná stanica"],
+  "Žilinská Lehota":["Železničná stanica","Hurbanova","Veľká okružná","Hálkova","Závodská","Priemyselná","Cestárska","Oceliarska","Furdekova","Priehradná","Prieložná","Pod Kozínom","Vodná nádrž Hričov","Rázcestie Hričov","Pod záhradkou","Kortinská","Žilinská Lehota"]
+ }},
+"30": {
+ type:"autobus", dirs:{
+  "Univerzitná":["Vranie","Jastrabia","Pri Kysuci","Budatínsky hrad","Kysucká","Železničná stanica","Štefánikovo námestie","Fakultná nemocnica","Plaváreň","Nová menza","Univerzitná"],
+  "Vranie":["Univerzitná","Fatranská","Športové centrum","Plaváreň","Fakultná nemocnica","Štefánikovo námestie","Železničná stanica","Kysucká","Budatínsky hrad","Pri Kysuci","Jastrabia","Vranie"]
+ }},
+"31": {
+ type:"autobus", dirs:{
+  "Asanačný podnik Rybné námestie":["Pietna, Krematórium","Kvačalova, DPMŽ","Cestárska","Kragujevská","Rázusova","Hurbanova","Železničná stanica","Predmestská","Košická, TESCO hypermarket","Pri celulózke","Šibenice, STK","Motel Šibenice","HYZA","Rybné námestie","Asanačný podnik"],
+  "Železničná stanica / Hurbanova / Kvačalova / Pietna, Krematórium":["Asanačný podnik","Rybné námestie","HYZA","Motel Šibenice","Šibenice, STK","Pri celulózke","Košická, TESCO hypermarket","Predmestská","Železničná stanica","Hurbanova","Rázusova","Kragujevská","Cestárska","Kvačalova, DPMŽ","Pietna, Krematórium"]
+ }},
+"50": {
+ type:"nočná", dirs:{
+  "Stodolova":["Železničná stanica","Hurbanova","Polícia","Veľká okružná, Aupark","Predmestská","Košická, TESCO hypermarket","Sv. Cyrila a Metoda","Obchodná","Matice slovenskej","Fatranská","Pod hájom","Jaseňová","Limbová","Smreková","Poľná","Hlinská","Mostná","Polícia","Hálkova","Závodská","Závodského","Žitná","Hôrecká","Essenská","Mateja Bela","Slnečné námestie","Stodolova"],
+  "Železničná stanica":["Stodolova","Slnečné námestie","Mateja Bela","Essenská","Hôrecká","Žitná","Závodského","Závodská","Hálkova","Polícia","Mostná","Hlinská","Poľná","Smreková","Limbová","Jaseňová","Pod hájom","Fatranská","Matice slovenskej","Obchodná","Sv. Cyrila a Metoda","Košická, TESCO hypermarket","Predmestská","Veľká okružná, Aupark","Hurbanova","Železničná stanica"]
+ }},
+"67": {
+ type:"autobus", dirs:{
+  "Vodné dielo":["Stodolova","Slnečné námestie","Mateja Bela","Hôrecká","Žitná","Závodského","Závodská","Hálkova","Komenského","Mostná","Hlinská","Poľná","Smreková","Limbová","Jaseňová","Pod hájom","Žilinská univerzita","Fatranská","Matice slovenskej","eXtreme park","Vodné dielo"],
+  "Stodolova":["Vodné dielo","eXtreme park","Matice slovenskej","Fatranská","Žilinská univerzita","Pod hájom","Jaseňová","Limbová","Smreková","Poľná","Hlinská","Mostná","Hálkova","Závodská","Závodského","Žitná","Hôrecká","Essenská","Mateja Bela","Slnečné námestie","Stodolova"]
+ }}
+};
+
+const ids=Object.keys(L).sort((a,b)=>+a-+b);
+let selectedLine=null;
+
+function fillLineLists(){
+ const all=document.getElementById("allLines");
+ const quick=document.getElementById("quickLines");
+ all.innerHTML=""; quick.innerHTML="";
+ ids.forEach(id=>{
+  const d=L[id], dirs=Object.keys(d.dirs);
+  const el=document.createElement("div");
+  el.className="line-item";
+  el.innerHTML=`<div class="line-top"><div class="badge">${id}</div><div><strong>${d.type}</strong><small>${dirs.join(" ↔ ")}</small></div></div>`;
+  all.appendChild(el);
+ });
+ ids.slice(0,6).forEach(id=>{
+  const d=L[id];
+  const el=document.createElement("div"); el.className="line-item";
+  el.innerHTML=`<div class="line-top"><div class="badge">${id}</div><div><strong>${d.type}</strong><small>${Object.keys(d.dirs).join(" ↔ ")}</small></div></div>`;
+  quick.appendChild(el);
+ });
+}
+
+function showReport(){
+ document.getElementById("home").classList.add("hidden");
+ document.getElementById("lines").classList.add("hidden");
+ document.getElementById("report").classList.remove("hidden");
+ document.getElementById("navHome").classList.add("active");
+ document.getElementById("navLines").classList.remove("active");
+ renderRouteButtons();
+ resetReport();
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function renderRouteButtons(){
+ const box=document.getElementById("routeButtons");
+ box.innerHTML="";
+ ids.forEach(id=>{
+   const b=document.createElement("button");
+   b.className="route-btn"; b.textContent=id;
+   b.onclick=()=>selectLine(id,b);
+   box.appendChild(b);
+ });
+}
+
+function selectLine(id,btn){
+ selectedLine=id;
+ document.querySelectorAll(".route-btn").forEach(x=>x.classList.remove("active"));
+ btn.classList.add("active");
+ const s=document.getElementById("direction");
+ s.innerHTML="";
+ Object.keys(L[id].dirs).forEach(dir=>{
+   const o=document.createElement("option");o.value=dir;o.textContent=dir;s.appendChild(o);
+ });
+ loadStops();
+ goReportStep(2);
+}
+
+function loadStops(){
+ if(!selectedLine) return;
+ const dir=document.getElementById("direction").value;
+ const stop=document.getElementById("stop");
+ stop.innerHTML="";
+ L[selectedLine].dirs[dir].forEach((name,i)=>{
+   const o=document.createElement("option");o.value=name;o.textContent=`${i+1}. ${name}`;stop.appendChild(o);
+ });
+ document.getElementById("success").classList.add("hidden");
+}
+
+function goReportStep(n){
+  if(n>=2 && !selectedLine) return;
+  if(n>=3) loadStops();
+  [1,2,3,4].forEach(i=>{
+    document.getElementById("reportStep"+i).classList.toggle("hidden",i!==n);
+  });
+  const fill=document.getElementById("progressFill");
+  const text=document.getElementById("progressText");
+  if(fill) fill.style.width=(n*25)+"%";
+  if(text) text.textContent="Krok "+n+" zo 4";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function updateCodeDisplay(){
+  const code=document.getElementById("code").value;
+  const dots=[...document.querySelectorAll("#codeDisplay span")];
+  dots.forEach((d,i)=>d.textContent=i<code.length ? "●" : "•");
+
+  const choices=document.getElementById("codeChoices");
+  const wifi=document.getElementById("wifiChoice");
+  const inspector=document.getElementById("inspectorChoice");
+  const title=document.getElementById("codeChoiceTitle");
+
+  choices.classList.toggle("hidden",code.length!==4);
+  wifi.classList.add("hidden");
+  inspector.classList.add("hidden");
+
+  if(code.length===4){
+    if(code==="2224"){
+      title.textContent="Špeciálny kód prijatý";
+      inspector.classList.remove("hidden");
+    }else{
+      title.textContent="Kód prijatý";
+      wifi.classList.remove("hidden");
+    }
+  }
+}
+
+function pressKey(key){
+  const input=document.getElementById("code");
+  if(input.value.length>=4) return;
+  input.value += key;
+  updateCodeDisplay();
+}
+
+function deleteKey(){
+  const input=document.getElementById("code");
+  input.value=input.value.slice(0,-1);
+  updateCodeDisplay();
+}
+
+async function chooseReportType(type){
+  const dir=document.getElementById("direction").value;
+  const stop=document.getElementById("stop").value;
+  const s=document.getElementById("success");
+  s.classList.remove("hidden");
+  s.textContent="Odosielam hlásenie…";
+
+  try{
+    const response=await fetch("/api/reports",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        line:selectedLine,
+        direction:dir,
+        stop:stop,
+        type:type
+      })
+    });
+    const data=await response.json();
+    if(!response.ok) throw new Error(data.message||"Hlásenie sa nepodarilo odoslať.");
+    s.textContent="✅ Hlásenie odoslané.";
+  }catch(err){
+    s.textContent="⚠️ Hlásenie sa nepodarilo odoslať. Skontroluj pripojenie.";
+  }
+}
+
+function resetReport(){
+  selectedLine=null;
+  document.getElementById("direction").innerHTML="";
+  document.getElementById("stop").innerHTML="";
+  document.getElementById("code").value="";
+  document.getElementById("success").classList.add("hidden");
+  document.getElementById("codeChoices").classList.add("hidden");
+  document.getElementById("wifiChoice").classList.add("hidden");
+  document.getElementById("inspectorChoice").classList.add("hidden");
+  document.getElementById("codeChoiceTitle").textContent="";
+  document.querySelectorAll(".route-btn").forEach(x=>x.classList.remove("active"));
+  updateCodeDisplay();
+  goReportStep(1);
+}
+
+function showHome(){
+ document.getElementById("home").classList.remove("hidden");
+ document.getElementById("report").classList.add("hidden");
+ document.getElementById("lines").classList.add("hidden");
+ document.getElementById("admin").classList.add("hidden");
+ document.getElementById("navHome").classList.add("active");
+ document.getElementById("navAdmin").classList.remove("active");
+ document.getElementById("navLines").classList.remove("active");
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+function showLines(){
+ document.getElementById("home").classList.add("hidden");
+ document.getElementById("report").classList.add("hidden");
+ document.getElementById("lines").classList.remove("hidden");
+ document.getElementById("admin").classList.add("hidden");
+ document.getElementById("navHome").classList.remove("active");
+ document.getElementById("navLines").classList.add("active");
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
+
+async function adminLogin(){
+  const user=document.getElementById("adminUser").value.trim();
+  const pass=document.getElementById("adminPass").value;
+  const status=document.getElementById("adminStatus");
+  status.classList.remove("hidden");
+  status.textContent="Prihlasovanie…";
+
+  try{
+    const response=await fetch("/api/admin/login",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      credentials:"same-origin",
+      body:JSON.stringify({username:user,password:pass})
+    });
+    const data=await response.json();
+    if(!response.ok) throw new Error(data.message||"Prihlásenie sa nepodarilo.");
+    status.textContent="✓ Prihlásenie úspešné.";
+    document.getElementById("adminLoginBox").classList.add("hidden");
+    document.getElementById("adminDashboard").classList.remove("hidden");
+    loadAdminReports();
+  }catch(err){
+    status.textContent=err.message||"Prihlásenie sa nepodarilo.";
+  }
+}
+
+async function loadAdminReports(){
+  const box=document.getElementById("adminReports");
+  box.innerHTML='<div class="notice">Načítavam hlásenia…</div>';
+
+  try{
+    const response=await fetch("/api/admin/reports",{
+      credentials:"same-origin"
+    });
+    const data=await response.json();
+    if(!response.ok) throw new Error(data.message||"Nepodarilo sa načítať hlásenia.");
+
+    if(!data.reports.length){
+      box.innerHTML='<div class="notice">Zatiaľ nemáš žiadne hlásenia.</div>';
+      return;
+    }
+
+    box.innerHTML="";
+    data.reports.forEach(report=>{
+      const el=document.createElement("div");
+      el.className="line-item";
+      const dt=new Date(report.created_at);
+      const time=new Intl.DateTimeFormat("sk-SK",{
+        dateStyle:"medium",
+        timeStyle:"medium",
+        timeZone:"Europe/Bratislava"
+      }).format(dt);
+
+      el.innerHTML=`
+        <div class="line-top">
+          <div class="badge">${escapeHtml(String(report.line))}</div>
+          <div>
+            <strong>${escapeHtml(report.type)}</strong>
+            <small>${escapeHtml(time)}</small>
+          </div>
+        </div>
+        <div class="meta">
+          <strong>Zastávka:</strong> ${escapeHtml(report.stop)}<br>
+          <strong>Smer:</strong> ${escapeHtml(report.direction)}<br>
+          <strong>Čas:</strong> ${escapeHtml(time)}
+        </div>`;
+      box.appendChild(el);
+    });
+  }catch(err){
+    box.innerHTML='<div class="notice">Nepodarilo sa načítať hlásenia.</div>';
+  }
+}
+
+function escapeHtml(value){
+  return value.replace(/[&<>"']/g, ch => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[ch]));
+}
+
+async function adminLogout(){
+  await fetch("/api/admin/logout",{method:"POST",credentials:"same-origin"});
+  document.getElementById("adminLoginBox").classList.remove("hidden");
+  document.getElementById("adminDashboard").classList.add("hidden");
+  document.getElementById("adminUser").value="";
+  document.getElementById("adminPass").value="";
+  document.getElementById("adminStatus").classList.add("hidden");
+}
+
+function showAdmin(){
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("report").classList.add("hidden");
+  document.getElementById("lines").classList.add("hidden");
+  document.getElementById("admin").classList.remove("hidden");
+  document.getElementById("navHome").classList.remove("active");
+  document.getElementById("navLines").classList.remove("active");
+  document.getElementById("navAdmin").classList.add("active");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+fillLineLists();
+</script>
+</body>
+</html>
